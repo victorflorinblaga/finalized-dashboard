@@ -1,66 +1,87 @@
 "use client";
 
-import React from "react";
-import { useQuery } from "@/hooks/useQuery";
-import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m60j2wqsppew0fnvhlo/query";
+import React from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuIndicator,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuViewport,
+} from "@/components/ui/navigation-menu";
+import Link from "next/link";
 
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
-
-export default function Page() {
-  
-  const [headers, rows, loading] = useQuery(query);
-
-  if (loading) return <LoadingIndicator />;
-  
-  const years = Array.from(new Set(rows.map(row => row[1]))); // Unique years
-  const germanyData = years.map(year => {
-    const row = rows.find(row => row[0] === 'Germany' && row[1] === year);
-    return row ? row[2] : 0; // Fallback to 0 if no data
-  });
-  const franceData = years.map(year => {
-    const row = rows.find(row => row[0] === 'France' && row[1] === year);
-    return row ? row[2] : 0; // Fallback to 0 if no data
-  });
-
-  const data = {
-    labels: years,
-    datasets: [
-      {
-        label: 'Germany',
-        data: germanyData,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 2,
-        fill: true,
-      },
-      {
-        label: 'France',
-        data: franceData,
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        borderColor: 'rgba(255, 99, 132, 1)',
-        borderWidth: 2,
-        fill: true,
-      },
-    ],
-  };
-
+export default function UrbanFarmingLandingPage() {
   return (
-    <div className="w-full h-full">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Population Data (2010-2020)</h2>
-        <Line data={data} options={{ responsive: true }} />
+    <div className="w-full h-full bg-green-100">
+      <nav className="p-4 bg-white shadow">
+        <NavigationMenu>
+          <NavigationMenuList>
+            <NavigationMenuItem>
+              <Link href="#" legacyBehavior passHref>
+                <NavigationMenuLink>Home</NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="#about" legacyBehavior passHref>
+                <NavigationMenuLink>About</NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="#services" legacyBehavior passHref>
+                <NavigationMenuLink>Services</NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+            <NavigationMenuItem>
+              <Link href="#contact" legacyBehavior passHref>
+                <NavigationMenuLink>Contact</NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+          </NavigationMenuList>
+        </NavigationMenu>
+      </nav>
+      
+      <div className="w-[90%] mx-auto py-12">
+        <h1 className="text-4xl font-bold text-center">Urban Farming: Grow Your Own Food</h1>
+        <p className="text-lg text-center mt-4">Join the urban farming movement and learn how to cultivate fresh produce in your own city space!</p>
+        
+        <div className="my-8">
+          <Carousel>
+            <CarouselContent>
+              <CarouselItem>
+                <img src="/images/urban-farming-1.jpg" alt="Urban Garden" className="w-full h-64 object-cover" />
+                <h2 className="text-xl font-semibold">Sustainable Practices</h2>
+              </CarouselItem>
+              <CarouselItem>
+                <img src="/images/urban-farming-2.jpg" alt="Community Farming" className="w-full h-64 object-cover" />
+                <h2 className="text-xl font-semibold">Community Engagement</h2>
+              </CarouselItem>
+              <CarouselItem>
+                <img src="/images/urban-farming-3.jpg" alt="Fresh Produce" className="w-full h-64 object-cover" />
+                <h2 className="text-xl font-semibold">Fresh and Healthy Food</h2>
+              </CarouselItem>
+            </CarouselContent>
+            <CarouselPrevious />
+            <CarouselNext />
+          </Carousel>
+        </div>
+
+        <h2 id="about" className="text-2xl font-bold mt-12 text-center">About Urban Farming</h2>
+        <p className="mt-4 text-center">Urban farming is the practice of cultivating, processing, and distributing food in or around urban areas. It makes fresh food more accessible, promotes sustainability, and connects communities.</p>
       </div>
+
+      <footer className="bg-white p-4 text-center mt-12">
+        <p>&copy; {new Date().getFullYear()} Urban Farming Initiative. All rights reserved.</p>
+      </footer>
     </div>
   );
 }
