@@ -1,7 +1,4 @@
 import React from "react";
-import {Progress} from "@/components/ui/progress";
-import {Card} from "./ui/card";
-import {Skeleton} from "./ui/skeleton";
 
 export default function LoadingIndicator() {
   return (

@@ -15,6 +15,7 @@ export function useQuery(query: string) {
       }),
     })
       .then(async (response) => {
+        console.log(response);
         const data = await response.json();
         const keys = data.head.vars;
         const bindings = data.results.bindings;
