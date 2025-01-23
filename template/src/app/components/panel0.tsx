@@ -21,9 +21,9 @@ export default function Page() {
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = rows.map(row => row[0]); // Assuming the first column contains country names
-  const co2Emissions = rows.map(row => row[1]); // Assuming the second column contains CO2 emissions
-  const populations = rows.map(row => row[2]); // Assuming the third column contains populations
+  const countries = Array.isArray(rows) ? rows.map(row => row[0]) : [];
+  const co2Emissions = (rows as never[]).map(row => row[1]); // Assuming the second column contains CO2 emissions
+  const populations = (rows as never[]).map(row => row[2]); // Assuming the third column contains populations
 
   const data = {
     datasets: [

@@ -23,8 +23,8 @@ export default function Page() {
 
   if (loading) return <LoadingIndicator />;
 
-  const years = rows.map(row => row[0]); // Assuming first item in each row is the year
-  const populations = rows.map(row => row[1]); // Assuming second item in each row is the population
+  const years = (rows as any[]).map(row => row[0]); // Assuming first item in each row is the year
+  const populations = (rows as any[]).map(row => row[1]); // Assuming second item in each row is the population
 
   const data = {
     labels: years,

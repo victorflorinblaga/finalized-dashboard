@@ -18,11 +18,11 @@ import { query } from "@/queries/generated/othertest@gmail.com/m6828u5r8fhn8g36p
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
 
 export default function Page() {
-  const [headers, rows, loading] = useQuery(query);
+  const [headers, rows, loading] = useQuery(query) as [string[], any[][], boolean];
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))]; // Extract unique countries
+  const countries = Array.isArray(rows) ? [...new Set(rows.map(row => row[0]))] : []; // Extract unique countries
   const datasets = countries.map((country, index) => ({
     label: country,
     data: rows
