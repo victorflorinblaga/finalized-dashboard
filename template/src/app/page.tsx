@@ -8,7 +8,7 @@ import Panel3 from "./components/panel3";
 // # this is branch main2
 
 export default function Dashboard() {
-  const [isScrollable, setIsScrollable] = useState(true);
+  const [isScrollable, setIsScrollable] = useState(false);
 
   const toggleScrollable = () => {
     setIsScrollable(!isScrollable);
