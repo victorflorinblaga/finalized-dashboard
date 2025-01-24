@@ -17,7 +17,12 @@ export default function Dashboard() {
   return (
     <div className="w-screen h-screen p-4">
       <div className="flex h-[5%] justify-between items-center mb-2 ">
-        <h1>Dashboard</h1>
+      <h1
+        className="pl-4 flex gap-2 items-center text-xl font-bold text-stone-800 tracking-wide font-inter select-none"
+      >
+        <img src="/logo_dive.svg" alt="Dive Logo" className="w-6" />
+        DIVE
+      </h1>
         <button
           onClick={toggleScrollable}
           className={`p-2 border-[1px] rounded ${
