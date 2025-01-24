@@ -1,52 +1,50 @@
 "use client";
 
 import React from "react";
-import { useEffect, useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m69867m8yiwsuqfickq/query";
-import { Line } from 'react-chartjs-2';
+import { query } from "@/queries/generated/othertest@gmail.com/m6aqy0geszp76hqpaid/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(query);
 
   if (loading) return <LoadingIndicator />;
 
-  const years = (rows as any[]).map(row => row[0]); // Assuming first item in each row is the year
-  const populations = (rows as any[]).map(row => row[1]); // Assuming second item in each row is the population
-
-  const data = {
-    labels: years,
-    datasets: [
-      {
-        label: 'Population',
-        data: populations,
-        fill: false,
-        backgroundColor: 'rgba(75, 192, 192, 0.4)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 2,
-        tension: 0.1,
-      },
-    ],
-  };
-
   return (
-    <div className="w-full h-full p-4">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Population Over Years</h2>
-        <Line data={data} options={{ responsive: true }} />
-      </div>
+    <div className="w-full h-full p-2">
+      <Table>
+        <TableCaption>A list of population and CO2 data by country and year.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index}>{header}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, rowIndex) => (
+            <TableRow 
+              key={rowIndex} 
+              className={`transition-colors duration-200 ${row.includes("2019") || row.includes("2020") || row.includes("2021") || row.includes("2022") ? "bg-yellow-200 hover:bg-yellow-300" : ""}`}
+            >
+              {row.map((cell, cellIndex) => (
+                <TableCell key={cellIndex}>
+                  {cell}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
