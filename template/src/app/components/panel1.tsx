@@ -1,59 +1,52 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m6f11fwyuptoa7gyw7r/query";
+import { Line } from 'react-chartjs-2';
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { query } from "@/queries/generated/othertest@gmail.com/m6f1h48w25p54ubbizvi/query";
+
+ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(query);
-  const [filter, setFilter] = useState("");
 
   if (loading) return <LoadingIndicator />;
 
-  const filteredRows = rows.filter(row => 
-    row[1].toLowerCase().includes(filter.toLowerCase())
-  );
+  const countries = [...new Set(rows.map(row => row[0]))];
+  const datasets = countries.map((country, index) => ({
+    label: country,
+    data: rows
+      .filter(row => row[0] === country)
+      .map(row => row[2]), 
+    borderColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 30}, ${(index + 1) * 100}, 1)`,
+    backgroundColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 30}, ${(index + 1) * 100}, 0.4)`,
+    borderWidth: 2,
+    fill: false,
+  }));
+
+  const uniqueYears = [...new Set(rows.map(row => row[1]))];
+
+  const data = {
+    labels: uniqueYears,
+    datasets,
+  };
 
   return (
-    <div className="w-full h-full p-2">
-      <input
-        type="text"
-        placeholder="Filter by country"
-        className="mb-4 p-2 border rounded"
-        value={filter}
-        onChange={(e) => setFilter(e.target.value)}
-      />
-      <Table>
-        <TableCaption>A summary of population and GDP data.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Population</TableHead>
-            <TableHead>Country</TableHead>
-            <TableHead>Year (2000 - 2020)</TableHead>
-            <TableHead>GDP</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {filteredRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
-              <TableCell>{row[0]}</TableCell>
-              <TableCell>{row[1]}</TableCell>
-              <TableCell>{row[2]}</TableCell>
-              <TableCell>{row[3]}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-[80%] bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Population Growth (2010 - 2020)</h2>
+        <Line data={data} options={{ responsive: true }} />
+      </div>
     </div>
   );
 }
