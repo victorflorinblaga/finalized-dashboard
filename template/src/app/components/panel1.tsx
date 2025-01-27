@@ -1,57 +1,59 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import { query } from "@/queries/generated/othertest@gmail.com/m6f11fwyuptoa7gyw7r/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m6ayyenw9pzfghciyue/query";
-
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(query);
+  const [filter, setFilter] = useState("");
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  const colorPalette = [
-    '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#FFBD33', 
-    '#A133FF', '#33FFF9', '#F933FF', '#33FF8D', '#FF6833'
-  ];
-
-  const datasets = countries.map((country, index) => ({
-    label: country,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => parseInt(row[2])), // Population data to integer
-    borderColor: colorPalette[index % colorPalette.length],
-    backgroundColor: `${colorPalette[index % colorPalette.length]}33`, // 20% opacity
-    borderWidth: 2,
-    fill: true,
-  }));
-
-  const uniqueYears = [...new Set(rows.map(row => row[1]))];
-
-  const data = {
-    labels: uniqueYears,
-    datasets,
-  };
+  const filteredRows = rows.filter(row => 
+    row[1].toLowerCase().includes(filter.toLowerCase())
+  );
 
   return (
     <div className="w-full h-full p-2">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Population Growth (2010 - 2020)</h2>
-        <Line data={data} options={{ responsive: true }} />
-      </div>
+      <input
+        type="text"
+        placeholder="Filter by country"
+        className="mb-4 p-2 border rounded"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
+      <Table>
+        <TableCaption>A summary of population and GDP data.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Population</TableHead>
+            <TableHead>Country</TableHead>
+            <TableHead>Year (2000 - 2020)</TableHead>
+            <TableHead>GDP</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              <TableCell>{row[0]}</TableCell>
+              <TableCell>{row[1]}</TableCell>
+              <TableCell>{row[2]}</TableCell>
+              <TableCell>{row[3]}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
