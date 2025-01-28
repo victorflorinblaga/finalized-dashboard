@@ -1,52 +1,56 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import { query } from "@/queries/generated/othertest@gmail.com/m6ghafnjr9dk2hgos3h/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m6f1h48w25p54ubbizvi/query";
-
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(query);
+  const [filter, setFilter] = useState("");
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  const datasets = countries.map((country, index) => ({
-    label: country,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => row[2]), 
-    borderColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 30}, ${(index + 1) * 100}, 1)`,
-    backgroundColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 30}, ${(index + 1) * 100}, 0.4)`,
-    borderWidth: 2,
-    fill: false,
-  }));
-
-  const uniqueYears = [...new Set(rows.map(row => row[1]))];
-
-  const data = {
-    labels: uniqueYears,
-    datasets,
-  };
+  const filteredRows = rows.filter(row => row[0].toLowerCase().includes(filter.toLowerCase()));
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-[80%] bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Population Growth (2010 - 2020)</h2>
-        <Line data={data} options={{ responsive: true }} />
-      </div>
+    <div className="w-full h-full p-2">
+      <Input 
+        type="text" 
+        placeholder="Filter by country..." 
+        value={filter} 
+        onChange={(e) => setFilter(e.target.value)} 
+        className="mb-4"
+      />
+      <Table>
+        <TableCaption>A summary of population and GDP data from 2000 to 2020.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index}>{header}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <TableCell key={cellIndex}>{cell}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
