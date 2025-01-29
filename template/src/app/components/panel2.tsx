@@ -3,47 +3,59 @@
 import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m6gh4wzvog1naletp7e/query";
+import { Line } from 'react-chartjs-2';
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { query } from "@/queries/generated/othertest@gmail.com/m6hxih7ix9r1s9rlai/query";
+
+ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+
+const colors = [
+  'rgba(255, 99, 132, 0.4)',
+  'rgba(54, 162, 235, 0.4)',
+  'rgba(255, 206, 86, 0.4)',
+  'rgba(75, 192, 192, 0.4)',
+  'rgba(153, 102, 255, 0.4)',
+  'rgba(255, 159, 64, 0.4)',
+];
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(query);
 
   if (loading) return <LoadingIndicator />;
 
+  const countries = [...new Set(rows.map(row => row[0]))];
+  const datasets = countries.map((country, index) => ({
+    label: country,
+    data: rows
+      .filter(row => row[0] === country)
+      .map(row => row[2]), // co2 data
+    backgroundColor: colors[index % colors.length],
+    borderColor: colors[index % colors.length].replace(/0\.4/, '1'), // Adjust opacity for border
+    borderWidth: 1,
+    fill: false,
+  }));
+
+  const uniqueYears = [...new Set(rows.map(row => row[1]))];
+
+  const data = {
+    labels: uniqueYears,
+    datasets,
+  };
+
   return (
-    <div className="w-full h-full p-2 overflow-x-auto">
-      <Table>
-        <TableCaption>Population and CO2 Data by Country and Year</TableCaption>
-        <TableHeader>
-          <TableRow>
-            {headers.map((header, index) => (
-              <TableHead key={index}>{header}</TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {rows.map((row, rowIndex) => {
-            const year = row[1]; // Assuming the year is in the second column
-            const isHighlighted = year >= 2019 && year <= 2022;
-            return (
-              <TableRow key={rowIndex} className={`${isHighlighted ? "bg-red-500 hover:bg-red-700" : ""}`}>
-                {row.map((cell, cellIndex) => (
-                  <TableCell key={cellIndex}>{cell}</TableCell>
-                ))}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+    <div className="size-full p-2 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-4xl">
+        <h2 className="text-xl font-semibold mb-4">CO2 Emissions by Country (2010 - 2020)</h2>
+        <Line data={data} options={{ responsive: true }} />
+      </div>
     </div>
   );
 }
