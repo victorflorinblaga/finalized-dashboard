@@ -13,9 +13,18 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m6hx840p9snunwqoxq/query";
+import { query } from "@/queries/generated/othertest@gmail.com/m6hx6ere7sxhy7uvobq/query";
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+
+const colors = [
+  'rgba(255, 99, 132, 0.4)',
+  'rgba(54, 162, 235, 0.4)',
+  'rgba(255, 206, 86, 0.4)',
+  'rgba(75, 192, 192, 0.4)',
+  'rgba(153, 102, 255, 0.4)',
+  'rgba(255, 159, 64, 0.4)',
+];
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(query);
@@ -23,25 +32,15 @@ export default function Page() {
   if (loading) return <LoadingIndicator />;
 
   const countries = [...new Set(rows.map(row => row[0]))];
-  const colors = {
-    Germany: {
-      borderColor: 'rgba(75, 192, 192, 1)',
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-    },
-    France: {
-      borderColor: 'rgba(255, 99, 132, 1)',
-      backgroundColor: 'rgba(255, 99, 132, 0.2)',
-    },
-  };
-
-  const datasets = countries.map(country => ({
+  const datasets = countries.map((country, index) => ({
     label: country,
     data: rows
       .filter(row => row[0] === country)
-      .map(row => parseFloat(row[2])), // GDP data as float
-    ...colors[country],
+      .map(row => row[2]), // Population data
+    backgroundColor: colors[index % colors.length],
+    borderColor: colors[index % colors.length].replace(/0\.4/, '1'), // Adjust opacity for border
     borderWidth: 1,
-    fill: true,
+    fill: false,
   }));
 
   const uniqueYears = [...new Set(rows.map(row => row[1]))];
@@ -52,9 +51,9 @@ export default function Page() {
   };
 
   return (
-    <div className="w-full h-full p-2 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-full md:w-[80%] lg:w-[60%]">
-        <h2 className="text-xl font-semibold mb-4">GDP Growth (2010 - 2020)</h2>
+    <div className="size-full p-2 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] md:w-[80%]">
+        <h2 className="text-xl font-semibold mb-4">Population Growth (2010 - 2020)</h2>
         <Line data={data} options={{ responsive: true }} />
       </div>
     </div>
