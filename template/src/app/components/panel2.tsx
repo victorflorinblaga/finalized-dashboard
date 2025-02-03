@@ -1,52 +1,75 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import { query } from "@/queries/generated/othertest@gmail.com/m6jwxkwynk6hfetch3b/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m6j71391u81fxe6ev3p/query";
-
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Page() {
+  const [selectedYear, setSelectedYear] = useState("All Years");
   const [headers, rows, loading] = useQuery(query);
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  const datasets = countries.map((country, index) => ({
-    label: country,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => parseFloat(row[2])), // CO2 data
-    borderColor: `rgba(${(index+1) * 50}, ${100 + index * 30}, ${150 + index * 30}, 1)`,
-    backgroundColor: `rgba(${(index+1) * 50}, ${100 + index * 30}, ${150 + index * 30}, 0.4)`,
-    borderWidth: 2,
-    fill: false,
-  }));
-
-  const uniqueYears = [...new Set(rows.map(row => row[1]))];
-
-  const data = {
-    labels: uniqueYears,
-    datasets,
-  };
+  const yearOptions = ["All Years", ...new Set(rows.map(row => row[1]))];
 
   return (
-    <div className="size-full p-2 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] md:w-[80%]">
-        <h2 className="text-xl font-semibold mb-4">CO2 Emissions from 2010 to 2020</h2>
-        <Line data={data} options={{ responsive: true }} />
-      </div>
+    <div className="w-full h-full p-2 overflow-x-auto">
+      <Table>
+        <TableCaption>A list of countries and their CO2 emissions and GDP for the year {selectedYear}.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index} className="w-auto">
+                {header === "year" ? (
+                  <div className="flex items-center">
+                    <span className="mr-2">{header}</span>
+                    <Select onValueChange={setSelectedYear} className="w-[120px]">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {yearOptions.map((year, index) => (
+                          <SelectItem key={index} value={year}>{year}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  header
+                )}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows
+            .filter(row => selectedYear === "All Years" || row[1] === selectedYear)
+            .map((row, rowIndex) => (
+              <TableRow key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <TableCell key={cellIndex} className="text-sm">{cell}</TableCell>
+                ))}
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
