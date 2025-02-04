@@ -13,12 +13,14 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { query } from "@/queries/generated/jandavid.stuetz@gmail.com/m6q9ucpe4w6z44cq1d/query";
+import { query } from "@/queries/generated/othertest@gmail.com/m6qk72hgbr07mdfk9ze/query";
 
 ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
 
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
+
 export default function Page() {
-  const [headers, rows, loading] = useQuery(query);
+  const [headers, rows, loading] = useQuery(url, query);
 
   if (loading) return <LoadingIndicator />;
 
@@ -27,11 +29,11 @@ export default function Page() {
     label: country,
     data: rows
       .filter(row => row[0] === country)
-      .map(row => parseInt(row[2])), // Population data
-    backgroundColor: `rgba(${index * 50}, ${100 + index * 20}, 200, 0.4)`,
-    borderColor: `rgba(${index * 50}, ${100 + index * 20}, 200, 1)`,
-    borderWidth: 1,
-    fill: false,
+      .map(row => row[2]), // Population data
+    borderColor: `rgba(${index * 30}, ${index * 50}, ${index * 100}, 1)`,
+    backgroundColor: `rgba(${index * 30}, ${index * 50}, ${index * 100}, 0.4)`,
+    borderWidth: 2,
+    fill: true,
   }));
 
   const uniqueYears = [...new Set(rows.map(row => row[1]))];
@@ -42,8 +44,8 @@ export default function Page() {
   };
 
   return (
-    <div className="w-full h-full p-2 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[90%]">
+    <div className="size-full p-2">
+      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] mx-auto">
         <h2 className="text-xl font-semibold mb-4">Population Growth (2010 - 2020)</h2>
         <Line data={data} options={{ responsive: true }} />
       </div>
