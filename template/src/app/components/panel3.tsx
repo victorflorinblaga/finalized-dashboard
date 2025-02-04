@@ -1,69 +1,75 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import { query } from "@/queries/generated/othertest@gmail.com/m6jwxkwynk6hfetch3b/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m6p0xe41lfle9tccill/query";
-
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
-
-const colors = [
-  'rgba(255, 99, 132, 0.4)',
-  'rgba(54, 162, 235, 0.4)',
-  'rgba(255, 206, 86, 0.4)',
-  'rgba(75, 192, 192, 0.4)',
-  'rgba(153, 102, 255, 0.4)',
-  'rgba(255, 159, 64, 0.4)',
-];
-
-const flagEmojis = {
-  "Germany": "🇩🇪",
-  "France": "🇫🇷",
-  "Japan": "🇯🇵",
-  "South Korea": "🇰🇷",
-  "Russia": "🇷🇺",
-};
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Page() {
+  const [selectedYear, setSelectedYear] = useState("All Years");
   const [headers, rows, loading] = useQuery(query);
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  const datasets = countries.map((country, index) => ({
-    label: `${flagEmojis[country] || ''} ${country}`,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => row[2]),
-    backgroundColor: colors[index % colors.length],
-    borderColor: colors[index % colors.length].replace(/0\.4/, '1'),
-    borderWidth: 1,
-    fill: false,
-  }));
-
-  const uniqueYears = [...new Set(rows.map(row => row[1]))];
-
-  const data = {
-    labels: uniqueYears,
-    datasets,
-  };
+  const yearOptions = ["All Years", ...new Set(rows.map(row => row[1]))];
 
   return (
-    <div className="w-full h-full p-2 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] md:w-[80%]">
-        <h2 className="text-xl font-semibold mb-4">Population Growth (1999 - 2022)</h2>
-        <Line data={data} options={{ responsive: true }} />
-      </div>
+    <div className="w-full h-full p-2 overflow-x-auto">
+      <Table>
+        <TableCaption>A list of countries and their CO2 emissions and GDP for the year {selectedYear}.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index} className="w-auto">
+                {header === "year" ? (
+                  <div className="flex items-center">
+                    <span className="mr-2">{header}</span>
+                    <Select onValueChange={setSelectedYear} className="w-[120px]">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {yearOptions.map((year, index) => (
+                          <SelectItem key={index} value={year}>{year}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : (
+                  header
+                )}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows
+            .filter(row => selectedYear === "All Years" || row[1] === selectedYear)
+            .map((row, rowIndex) => (
+              <TableRow key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <TableCell key={cellIndex} className="text-sm">{cell}</TableCell>
+                ))}
+              </TableRow>
+            ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
