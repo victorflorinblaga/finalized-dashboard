@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-export function useQuery(query: string) {
+export function useQuery(query: string, url: string) {
   const [headers, setHeaders] = useState([]);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,6 +12,7 @@ export function useQuery(query: string) {
       method: "POST",
       body: JSON.stringify({
         query,
+        url
       }),
     })
       .then(async (response) => {

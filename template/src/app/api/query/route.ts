@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
-    const url = process.env.SPARQL_ENDPOINT!
-    const {query} = await req.json()
+    const {query , url} = await req.json()
 
   const response = await fetch(
     `${url}?query=${encodeURIComponent(query)}`,
