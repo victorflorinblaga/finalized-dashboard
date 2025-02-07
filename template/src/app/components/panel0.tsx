@@ -1,65 +1,49 @@
 "use client";
 
-import React from "react";
+import React from "react"
 import { useQuery } from "@/hooks/useQuery";
-import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import LoadingIndicator from "@/components/LoadingIndicator"
+import { query } from "@/queries/generated/othertest@gmail.com/m6uvfyg5tskdrg0g3s/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m6tb4bbsbd3s11ez7fe/query";
-
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
 export default function Page() {
+  
   const [headers, rows, loading] = useQuery(url, query);
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  
-  const colorPalette = [
-    'rgba(75, 0, 0, 1)', 
-    'rgba(0, 75, 0, 1)', 
-    'rgba(0, 0, 75, 1)', 
-    'rgba(75, 75, 0, 1)', 
-    'rgba(75, 0, 75, 1)', 
-    'rgba(0, 75, 75, 1)', 
-    'rgba(100, 100, 100, 1)'
-  ];
-
-  const datasets = countries.map((country, index) => ({
-    label: country,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => row[2]), // CO2 data
-    backgroundColor: colorPalette[index % colorPalette.length],
-    borderColor: colorPalette[index % colorPalette.length],
-    borderWidth: 1,
-    fill: false,
-  }));
-
-  const uniqueYears = [...new Set(rows.map(row => row[1]))];
-
-  const data = {
-    labels: uniqueYears,
-    datasets,
-  };
+  const germanyImageUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Flag_of_Germany.svg/2560px-Flag_of_Germany.svg.png";
+  const franceImageUrl = "https://upload.wikimedia.org/wikipedia/en/c/c3/Flag_of_France.svg";
 
   return (
-    <div className="w-full h-full p-2">
-      <div className="bg-white rounded-lg shadow-md p-6 w-full md:w-[80%]">
-        <h2 className="text-xl font-semibold mb-4">CO2 Emissions by Country (2010 - 2020)</h2>
-        <Line data={data} options={{ responsive: true }} />
-      </div>
+    <div className="w-full h-full p-4 flex flex-col items-center justify-center space-y-4">
+      <Card className="w-full md:w-1/2 lg:w-1/3">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold">Comparison Germany and France</CardTitle>
+          <CardDescription className="text-sm">A detailed analysis of data from Germany and France.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center space-x-4">
+            <Avatar>
+              <AvatarImage src={germanyImageUrl} />
+              <AvatarFallback>Germany Flag</AvatarFallback>
+            </Avatar>
+            <Avatar>
+              <AvatarImage src={franceImageUrl} />
+              <AvatarFallback>France Flag</AvatarFallback>
+            </Avatar>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  );
+  )
 }
