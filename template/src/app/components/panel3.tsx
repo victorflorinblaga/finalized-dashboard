@@ -3,19 +3,18 @@
 import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  LineElement,
-  PointElement,
+  BarElement,
   Tooltip,
   Legend,
 } from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m6qk72hgbr07mdfk9ze/query";
+import { query } from "@/queries/generated/othertest@gmail.com/m6uwq74w2bl8rwimh31/query";
 
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
@@ -24,17 +23,22 @@ export default function Page() {
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  const datasets = countries.map((country, index) => ({
-    label: country,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => row[2]), // Population data
-    borderColor: `rgba(${index * 30}, ${index * 50}, ${index * 100}, 1)`,
-    backgroundColor: `rgba(${index * 30}, ${index * 50}, ${index * 100}, 0.4)`,
-    borderWidth: 2,
-    fill: true,
-  }));
+  const datasets = [
+    {
+      label: "Germany",
+      data: rows
+        .filter(row => row[0] === "Germany")
+        .map(row => Number(row[2])),
+      backgroundColor: "rgba(255, 0, 0, 0.4)",
+    },
+    {
+      label: "France",
+      data: rows
+        .filter(row => row[0] === "France")
+        .map(row => Number(row[2])),
+      backgroundColor: "rgba(0, 0, 255, 0.4)",
+    }
+  ];
 
   const uniqueYears = [...new Set(rows.map(row => row[1]))];
 
@@ -44,10 +48,10 @@ export default function Page() {
   };
 
   return (
-    <div className="size-full p-2">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] mx-auto">
-        <h2 className="text-xl font-semibold mb-4">Population Growth (2010 - 2020)</h2>
-        <Line data={data} options={{ responsive: true }} />
+    <div className="w-full h-full p-2 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] lg:w-[80%]">
+        <h2 className="text-xl font-semibold mb-4">Population Growth Germany and France (2010 - 2020)</h2>
+        <Bar data={data} options={{ responsive: true }} />
       </div>
     </div>
   );
