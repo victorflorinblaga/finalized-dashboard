@@ -3,7 +3,7 @@
 import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m7dfaitkvtuo0byhtxl/query";
+import { query } from "@/queries/generated/othertest@gmail.com/m7dhysvp6ty4ttupn85/query";
 import {
   Table,
   TableBody,
@@ -14,42 +14,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
 export default function Page() {
+  
   const [headers, rows, loading] = useQuery(url, query);
 
   if (loading) return <LoadingIndicator />;
 
-  const projectEtaRow = rows.find(row => row[1] === "Project Eta");
-  const projectEtaStartDate = projectEtaRow ? projectEtaRow[3] : "Date not found";
-  
-  const updatedRows = [["", "Project Eta", "", projectEtaStartDate, "", "", "", "", ""]].concat(rows.filter(row => row[1] !== "Project Eta"));
+  const germanyRows = rows.filter(row => row[0] === "Germany");
+  const lowestGdpRow = germanyRows.reduce((prev, curr) => {
+    return parseFloat(prev[3]) < parseFloat(curr[3]) ? prev : curr;
+  });
 
   return (
-    <div className="w-full h-full p-4">
+    <div className="w-full h-full p-2 overflow-x-auto">
       <Table>
-        <TableCaption>A table of project details.</TableCaption>
+        <TableCaption>Year with the lowest GDP for Germany.</TableCaption>
         <TableHeader>
           <TableRow>
             {headers.map((header, index) => (
-              <TableHead key={index} className="uppercase">{header}</TableHead>
+              <TableHead key={index}>{header}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {updatedRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex} className={row[2] === "In Progress" ? "bg-yellow-100" : ""}>
-              {row.map((cell, cellIndex) => (
-                <TableCell key={cellIndex}>{cell}</TableCell>
-              ))}
-            </TableRow>
-          ))}
+          <TableRow>
+            {lowestGdpRow.map((cell, cellIndex) => (
+              <TableCell key={cellIndex}>{cell}</TableCell>
+            ))}
+          </TableRow>
         </TableBody>
       </Table>
-      <div className="mt-4 text-lg">
-        Start Date of "Project Eta": <strong>{projectEtaStartDate}</strong>
-      </div>
     </div>
   );
 }
