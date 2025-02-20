@@ -1,45 +1,55 @@
 "use client";
 
 import React from "react";
-import { useEffect, useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m7ag0j01d6vp7uuazzm/query";
+import { Bar } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+import { query } from "@/queries/generated/othertest@gmail.com/m7dg49vvjviyn4i90a/query";
 
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(url, query);
 
   if (loading) return <LoadingIndicator />;
 
-  const filteredRows = rows.filter(row => row[0] === "Germany");
-  const sortedRows = filteredRows.sort((a, b) => parseFloat(a[3]) - parseFloat(b[3]));
+  const projectVolumes = rows.reduce((acc, row) => {
+    const project = row[1]; // rfq_title
+    const volume = parseFloat(row[2]); // rfq_volume
+    acc[project] = (acc[project] || 0) + volume;
+    return acc;
+  }, {});
+
+  const sortedProjects = Object.entries(projectVolumes)
+    .sort((a, b) => b[1] - a[1]); // Sort descending by volume
+
+  const data = {
+    labels: sortedProjects.map(item => item[0]),
+    datasets: [{
+      label: 'RFQ Volume',
+      backgroundColor: 'rgba(75,192,192,1)',
+      borderColor: 'rgba(255,255,255)',
+      borderWidth: 2,
+      data: sortedProjects.map(item => item[1]),
+    }],
+  };
 
   return (
-    <div className="w-full h-full p-4 overflow-x-auto">
-      <table className="min-w-full bg-white border border-gray-200">
-        <thead>
-          <tr>
-            {headers.map((header, index) => (
-              <th key={index} className="py-2 px-4 border-b">
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sortedRows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={`hover:bg-gray-100 ${row[1] === "2008" ? "bg-yellow-200" : ""}`}>
-              {row.map((cell, cellIndex) => (
-                <td key={cellIndex} className="py-2 px-4 border-b">
-                  {cell}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="w-full h-full p-4">
+      <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-4xl mx-auto">
+        <h2 className="text-xl font-semibold mb-4">RFQ Volume by Project</h2>
+        <Bar data={data} options={{ responsive: true }} />
+      </div>
     </div>
   );
 }
