@@ -3,7 +3,7 @@
 import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m7k9pmze8solaxir2lp/query";
+import { query } from "@/queries/generated/othertest@gmail.com/m7kic9bedd20gq5keth/query";
 import {
   Table,
   TableBody,
@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { format } from "date-fns";
 
 const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
 
@@ -28,19 +29,20 @@ export default function Page() {
         <TableHeader>
           <TableRow>
             {headers.map((header, index) => (
-              <TableHead key={index} className="text-left">{header}</TableHead>
+              <TableHead key={index}>{header.replace(/_/g, ' ')}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.map((row, rowIndex) => (
-            <TableRow 
-              key={rowIndex} 
-              className={row[2] === 'in Progress' ? 'bg-yellow-100' : ''}
-            >
-              {row.map((cell, cellIndex) => (
-                <TableCell key={cellIndex} className="font-medium">{cell}</TableCell>
-              ))}
+            <TableRow key={rowIndex} className={row[2] === "In Progress" ? "bg-yellow-100" : ""}>
+              {row.map((cell, cellIndex) => {
+                if (cellIndex === 3) {
+                  const formattedDate = format(new Date(cell), "dd.MM.yyyy");
+                  return <TableCell key={cellIndex}>{formattedDate}</TableCell>;
+                }
+                return <TableCell key={cellIndex}>{cell}</TableCell>;
+              })}
             </TableRow>
           ))}
         </TableBody>
