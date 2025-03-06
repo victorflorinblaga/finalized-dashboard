@@ -12,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m7xb3t2d4pyxmal5hyi/query";
+import { query } from "@/queries/generated/othertest@gmail.com/m7xdb569lex95p8cicm/query";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -23,34 +23,30 @@ export default function Page() {
 
   if (loading) return <LoadingIndicator />;
 
-  const countrySums = {};
+  const countries = [...new Set(rows.map(row => row[0]))];
+  const uniqueYears = [...new Set(rows.map(row => row[1]))];
 
-  rows.forEach(row => {
-    const country = row[0];
-    const co2 = parseFloat(row[2]);
-    if (!countrySums[country]) {
-      countrySums[country] = 0;
-    }
-    countrySums[country] += co2;
-  });
+  const datasets = uniqueYears.map((year, index) => ({
+    label: year,
+    data: countries.map(country => {
+      const row = rows.find(row => row[0] === country && row[1] === year);
+      return row ? parseFloat(row[2]) : 0;
+    }),
+    backgroundColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 50}, 192, 0.5)`,
+    borderColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 50}, 192, 1)`,
+    borderWidth: 2,
+  }));
 
-  const countries = Object.keys(countrySums);
   const data = {
     labels: countries,
-    datasets: [{
-      label: 'Total CO2 Emissions',
-      backgroundColor: 'rgba(75, 192, 192, 0.6)',
-      borderColor: 'rgba(75, 192, 192, 1)',
-      borderWidth: 1,
-      data: countries.map(country => countrySums[country]),
-    }],
+    datasets,
   };
 
   return (
-    <div className="w-full h-full p-2 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] max-w-3xl">
-        <h2 className="text-xl font-semibold mb-4">Total CO2 Emissions by Country (2010 - 2020)</h2>
-        <Bar data={data} options={{ responsive: true }} />
+    <div className="w-full h-full">
+      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] mx-auto">
+        <h2 className="text-xl font-semibold mb-4">CO2 Emissions (by Country)</h2>
+        <Bar data={data} options={{ responsive: true }} className="h-[60%] w-full" />
       </div>
     </div>
   );
