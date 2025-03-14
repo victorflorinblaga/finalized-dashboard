@@ -1,53 +1,76 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import { query } from "@/queries/generated/othertest@gmail.com/m88rkmzd655rpqllmy/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/othertest@gmail.com/m88m8qxx6oqw2ht9n1/query";
-
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(url, query);
+  const [filterText, setFilterText] = useState("");
+  const [isSorted, setIsSorted] = useState(false);
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  const datasets = countries.map((country, index) => ({
-    label: country,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => row[2]), // CO2 data
-    borderColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 40}, ${(index + 1) * 30}, 1)`,
-    backgroundColor: `rgba(${(index + 1) * 50}, ${(index + 1) * 40}, ${(index + 1) * 30}, 0.4)`,
-    fill: true,
-  }));
+  const filteredRows = rows.filter(row => row[3].includes(filterText)); // Assuming CO2 values are in the 4th column
 
-  const uniqueYears = [...new Set(rows.map(row => row[1]))];
-
-  const data = {
-    labels: uniqueYears,
-    datasets,
-  };
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    const co2PerCapitaA = parseFloat(a[4]);
+    const co2PerCapitaB = parseFloat(b[4]);
+    return isSorted ? co2PerCapitaB - co2PerCapitaA : co2PerCapitaA - co2PerCapitaB;
+  });
 
   return (
-    <div className="size-full p-2 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-full md:w-[80%]">
-        <h2 className="text-xl font-semibold mb-4">CO2 Emissions (2010 - 2020)</h2>
-        <Line data={data} options={{ responsive: true }} />
-      </div>
+    <div className="w-full h-full p-2">
+      <Label htmlFor="co2-filter" className="mb-2 block">
+        Filter by CO2 values
+      </Label>
+      <Input
+        id="co2-filter"
+        type="text"
+        placeholder="Enter CO2 value"
+        className="mb-4 p-2 border border-gray-300 rounded w-full"
+        value={filterText}
+        onChange={(e) => setFilterText(e.target.value)}
+      />
+      <button
+        onClick={() => setIsSorted(prev => !prev)}
+        className="mb-4 p-2 border border-gray-500 rounded bg-gray-200 hover:bg-gray-300"
+      >
+        Sort CO2 per Capita {isSorted ? 'Descending' : 'Ascending'}
+      </button>
+      <Table>
+        <TableCaption>A list of countries and their CO2 emissions.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index}>{header}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <TableCell key={cellIndex}>{cell}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
