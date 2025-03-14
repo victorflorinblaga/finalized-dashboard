@@ -1,59 +1,53 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { query } from "@/queries/generated/othertest@gmail.com/m7xdni5a1fqt4llqbmp/query";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { query } from "@/queries/generated/othertest@gmail.com/m88mkc3tlxg4fw9ik6/query";
 
 const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
 export default function Page() {
-  const [allCountriesLowestGdp, setAllCountriesLowestGdp] = useState([]);
+  
   const [headers, rows, loading] = useQuery(url, query);
-
-  useEffect(() => {
-    if (rows.length) {
-      const gdpData = rows.map(row => ({
-        country: row[0],
-        year: row[1],
-        gdp: parseFloat(row[3]) // Assuming GDP is in the fourth column and is numeric
-      }));
-
-      const lowestGdpByCountry = {};
-      
-      gdpData.forEach(data => {
-        const { country, year, gdp } = data;
-        if (!lowestGdpByCountry[country] || gdp < lowestGdpByCountry[country].gdp) {
-          lowestGdpByCountry[country] = { year, gdp };
-        }
-      });
-
-      setAllCountriesLowestGdp(Object.entries(lowestGdpByCountry).map(([country, { year, gdp }]) => ({ country, year, gdp })));
-    }
-  }, [rows]);
 
   if (loading) return <LoadingIndicator />;
 
+  const germanyRows = rows.filter(row => row[0] === "Germany");
+  const gdpColumnIndex = headers.indexOf("gdp");
+  const lowestGdp = Math.min(...germanyRows.map(row => parseFloat(row[gdpColumnIndex])));
+
   return (
-    <div className="w-full h-full p-2 overflow-x-auto">
+    <div className="w-full h-full p-2">
       <Table>
-        <TableCaption>Lowest GDP data for all countries.</TableCaption>
+        <TableCaption>A list of sustainability data.</TableCaption>
         <TableHeader>
           <TableRow>
             {headers.map((header, index) => (
-              <TableHead key={index} className="max-w-[150px]">{header}</TableHead>
+              <TableHead key={index}>{header}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {allCountriesLowestGdp.map((data, index) => (
-            <TableRow key={index}>
-              <TableCell className="font-bold">{data.country}</TableCell>
-              <TableCell className="font-medium">{data.year}</TableCell>
-              <TableCell className="font-medium">{data.gdp}</TableCell>
-            </TableRow>
-          ))}
+          {rows.map((row, rowIndex) => {
+            const isLowestGdp = row[0] === "Germany" && parseFloat(row[gdpColumnIndex]) === lowestGdp;
+            return (
+              <TableRow key={rowIndex} className={`${row[1] === "2008" ? "bg-yellow-200" : ""} ${row[0] === "Germany" ? "bg-green-500" : ""} ${isLowestGdp ? "bg-red-200" : ""}`}>
+                {row.map((cell, cellIndex) => (
+                  <TableCell key={cellIndex}>{cell}</TableCell>
+                ))}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>
