@@ -3,6 +3,9 @@
 import React, { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -12,71 +15,58 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { query } from "@/queries/generated/othertest@gmail.com/m88r76skskoi8y27wr8/query";
+import { query } from "@/queries/generated/selam.sandy@yahoo.com/m8q1s4xnbontfrurhvh/query";
 
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
 
 export default function Page() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showTopParents, setShowTopParents] = useState(false);
   const [headers, rows, loading] = useQuery(url, query);
-  const [countryFilter, setCountryFilter] = useState("");
-  const [yearFilter, setYearFilter] = useState("");
-  const [sortOrder, setSortOrder] = useState("asc");
 
   if (loading) return <LoadingIndicator />;
 
   const filteredRows = rows.filter(row => 
-    row[0].toLowerCase().includes(countryFilter.toLowerCase()) &&
-    row[1].includes(yearFilter)
+    row[1].toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (!showTopParents || row[3] === "true")
   );
 
-  const sortedRows = filteredRows.sort((a, b) => {
-    const gdpA = parseFloat(a[2]);
-    const gdpB = parseFloat(b[2]);
-    return sortOrder === "asc" ? gdpA - gdpB : gdpB - gdpA;
-  });
+  const humanReadableHeaders = headers.map(header => 
+    header.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase())
+  );
 
   return (
-    <div className="w-full h-full p-4 md:p-6 lg:p-8">
-      <div className="mb-4 flex flex-col md:flex-row">
-        <input
-          type="text"
-          placeholder="Filter by country"
-          value={countryFilter}
-          onChange={(e) => setCountryFilter(e.target.value)}
-          className="border border-gray-300 p-2 rounded mr-2 mb-2 md:mb-0 md:mr-2"
+    <div className="w-full h-full p-2 overflow-x-auto">
+      <div className="flex items-center mb-4">
+        <Input 
+          type="text" 
+          placeholder="Search by supplier name..." 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+          className="mr-4 w-full md:w-1/3" 
         />
-        <input
-          type="text"
-          placeholder="Filter by year"
-          value={yearFilter}
-          onChange={(e) => setYearFilter(e.target.value)}
-          className="border border-gray-300 p-2 rounded mb-2 md:mb-0 md:mr-2"
-        />
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-          className="border border-gray-300 p-2 rounded"
-        >
-          <option value="asc">Sort by GDP (Lowest to Highest)</option>
-          <option value="desc">Sort by GDP (Highest to Lowest)</option>
-        </select>
+        <label className="flex items-center">
+          <Switch 
+            checked={showTopParents} 
+            onCheckedChange={setShowTopParents}
+          />
+          <Label className="ml-2 font-medium">Show Parents</Label>
+        </label>
       </div>
       <Table>
-        <TableCaption>A list of GDP data by country and year.</TableCaption>
+        <TableCaption>A list of suppliers and their details.</TableCaption>
         <TableHeader>
           <TableRow>
-            {headers.map((header, index) => (
-              <TableHead key={index}>{header}</TableHead>
+            {humanReadableHeaders.map((header, index) => (
+              <TableHead key={index} className="whitespace-nowrap">{header}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex} className={row[1] === "2008" ? "bg-yellow-200" : ""}>
+          {filteredRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
               {row.map((cell, cellIndex) => (
-                <TableCell key={cellIndex}>
-                  {cell}
-                </TableCell>
+                <TableCell key={cellIndex} className="whitespace-nowrap">{cell}</TableCell>
               ))}
             </TableRow>
           ))}
