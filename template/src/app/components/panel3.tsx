@@ -3,7 +3,7 @@
 import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/othertest@gmail.com/m88qomyg9o921p68zaq/query";
+import { query } from "@/queries/generated/selam.sandy@yahoo.com/m8q1lkgwnolz3jgauen/query";
 import {
   Table,
   TableBody,
@@ -14,29 +14,32 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
 
 export default function Page() {
+  
   const [headers, rows, loading] = useQuery(url, query);
 
   if (loading) return <LoadingIndicator />;
 
+  const humanReadableHeaders = ["Id", "Project Title", "Status", "Start Date"];
+
   return (
-    <div className="w-full h-full bg-black p-4">
+    <div className="w-full h-full p-2">
       <Table>
-        <TableCaption className="text-white">A list of countries 🌍 and their populations 👥 from 2010 to 2012.</TableCaption>
+        <TableCaption>A list of projects.</TableCaption>
         <TableHeader>
           <TableRow>
-            {headers.map((header) => (
-              <TableHead key={header} className="text-white">{header}</TableHead>
+            {humanReadableHeaders.map((header, index) => (
+              <TableHead key={index} className="w-auto">{header}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row, index) => (
-            <TableRow key={index}>
+          {rows.map((row, rowIndex) => (
+            <TableRow key={rowIndex} className={row[2] === "In Progress" ? "bg-blue-500" : ""}>
               {row.map((cell, cellIndex) => (
-                <TableCell key={cellIndex} className="text-white">{cell}</TableCell>
+                <TableCell key={cellIndex} className="font-medium">{cell}</TableCell>
               ))}
             </TableRow>
           ))}
