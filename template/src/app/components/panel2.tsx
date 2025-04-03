@@ -1,58 +1,62 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { query } from "@/queries/generated/selam.geg@yahoo.com/m8x1xe1g9rdttv3munr/query";
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { query } from "@/queries/generated/selam.geg@yahoo.com/m90vxldsxvbpkbzzork/query";
 
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(url, query);
-  const [filter, setFilter] = useState("0");
 
   if (loading) return <LoadingIndicator />;
 
-  const filteredRows = rows.filter(row => {
-    const co2Index = headers.indexOf("co2");
-    return parseFloat(row[co2Index]) > parseFloat(filter);
+  const supplierMap = {};
+  rows.forEach(row => {
+    const supplier = row[1]; // Assuming supplier_name is at index 1
+    if (supplierMap[supplier]) {
+      supplierMap[supplier]++;
+    } else {
+      supplierMap[supplier] = 1;
+    }
   });
 
-  const sortedRows = filteredRows.sort((a, b) => {
-    const co2PerCapitaIndex = headers.indexOf("co2_per_capita");
-    return parseFloat(b[co2PerCapitaIndex]) - parseFloat(a[co2PerCapitaIndex]);
-  });
+  const suppliers = Object.keys(supplierMap);
+  const supplierCounts = Object.values(supplierMap);
+
+  const data = {
+    labels: suppliers,
+    datasets: [
+      {
+        label: 'Supplier Count',
+        data: supplierCounts,
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+      },
+    ],
+  };
 
   return (
-    <div className="w-full h-full p-2 overflow-x-auto">
-      <Input 
-        type="number"
-        placeholder="Filter by CO2 values" 
-        value={filter} 
-        onChange={e => setFilter(e.target.value)} 
-        className="mb-4 max-w-xs"
-      />
-      <Table>
-        <TableCaption>A table of sustainability data.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            {headers.map((header, index) => (
-              <TableHead key={index} className="text-left">{header}</TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex}>
-              {row.map((cell, cellIndex) => (
-                <TableCell key={cellIndex} className="text-left">{cell}</TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+    <div className="w-full h-full p-4">
+      <div className="min-w-full">
+        <Bar data={data} options={{
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Supplier Distribution',
+            },
+          },
+        }} />
+      </div>
     </div>
   );
 }
