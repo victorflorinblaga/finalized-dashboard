@@ -1,60 +1,71 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Line } from 'react-chartjs-2';
+import { query } from "@/queries/generated/selam.geg@yahoo.com/m90xsaaractw7a44etd/query";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/selam.geg@yahoo.com/m8x15cnnq6ot2fud27/query";
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 
-ChartJS.register(CategoryScale, LinearScale, LineElement, PointElement, Tooltip, Legend);
-
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
 
 export default function Page() {
+  
   const [headers, rows, loading] = useQuery(url, query);
+  const [filter, setFilter] = useState("");
+  const [showTopParent, setShowTopParent] = useState(false);
 
   if (loading) return <LoadingIndicator />;
 
-  const countries = [...new Set(rows.map(row => row[0]))];
-  const colors = [
-    'rgba(75, 192, 192, 0.4)', // color for first country
-    'rgba(255, 99, 132, 0.4)', // color for second country
-    'rgba(255, 206, 86, 0.4)'  // color for third country
-  ];
-  
-  const datasets = countries.map((country, index) => ({
-    label: country,
-    data: rows
-      .filter(row => row[0] === country)
-      .map(row => parseFloat(row[2])), // CO2 data
-    backgroundColor: colors[index % colors.length],
-    borderColor: colors[index % colors.length].replace('0.4', '1'), // border color
-    borderWidth: 1,
-    fill: false,
-  }));
+  const filteredRows = rows.filter(row => 
+    row[1].toLowerCase().includes(filter.toLowerCase())
+  );
 
-  const uniqueYears = [...new Set(rows.map(row => row[1]))];
-
-  const data = {
-    labels: uniqueYears,
-    datasets,
-  };
+  const finalRows = showTopParent ? filteredRows.filter(row => row[3] === "true") : filteredRows;
 
   return (
-    <div className="w-full h-full p-2 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[90%] md:w-[80%] lg:w-[70%]">
-        <h2 className="text-xl font-semibold mb-4">CO2 Emissions (2010 - 2020)</h2>
-        <Line data={data} options={{ responsive: true }} />
+    <div className="w-full h-full p-4">
+      <div className="flex items-center mb-4">
+        <Textarea
+          placeholder="Filter by supplier name"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="mr-2 w-1/3"  // Adjusted to make it smaller
+        />
+        <label className="mr-2">Show only top parent suppliers:</label>
+        <Switch 
+          checked={showTopParent} 
+          onCheckedChange={(checked) => setShowTopParent(checked)} 
+        />
       </div>
+      <Table>
+        <TableCaption>A list of suppliers.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index}>{header}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {finalRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <TableCell key={cellIndex}>{cell}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
