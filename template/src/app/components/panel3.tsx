@@ -4,17 +4,10 @@ import React from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
 import { Bar } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-  Legend,
-} from 'chart.js';
-import { query } from "@/queries/generated/selam.geg@yahoo.com/m90y3gqls6d0tl2zev/query";
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { query } from "@/queries/generated/selam.geg@yahoo.com/m90vxldsxvbpkbzzork/query";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
 
@@ -23,71 +16,46 @@ export default function Page() {
 
   if (loading) return <LoadingIndicator />;
 
-  const rfqTitles = rows.map(row => row[2]); // rfq_title data
-  const rfqVolumes = rows.map(row => parseInt(row[1])); // rfq_volume data
+  const supplierMap = {};
+  rows.forEach(row => {
+    const supplier = row[1]; // Assuming supplier_name is at index 1
+    if (supplierMap[supplier]) {
+      supplierMap[supplier]++;
+    } else {
+      supplierMap[supplier] = 1;
+    }
+  });
+
+  const suppliers = Object.keys(supplierMap);
+  const supplierCounts = Object.values(supplierMap);
 
   const data = {
-    labels: rfqTitles,
+    labels: suppliers,
     datasets: [
       {
-        label: 'RFQ Volume',
-        data: rfqVolumes,
+        label: 'Supplier Count',
+        data: supplierCounts,
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1,
       },
     ],
   };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: true,
-      },
-      tooltip: {
-        callbacks: {
-          label: function (context) {
-            return `Volume: ${context.raw}`;
-          },
-        },
-      },
-      datalabels: {
-        display: true,
-        anchor: 'end',
-        align: 'end',
-        formatter: (value) => value,
-        color: 'black',
-        font: {
-          weight: 'bold',
-        },
-      },
-    },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'RFQ Titles',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'RFQ Volume',
-        },
-      },
-    },
-  };
-
   return (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-md p-6 w-[90%]">
-        <h2 className="text-xl font-semibold mb-4">RFQ Volumes in 2024</h2>
-        <Bar 
-          data={data} 
-          options={options} 
-          className="h-[80%] w-[100%]" 
-        />
+    <div className="w-full h-full p-4">
+      <div className="min-w-full">
+        <Bar data={data} options={{
+          responsive: true,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top',
+            },
+            title: {
+              display: true,
+              text: 'Supplier Distribution',
+            },
+          },
+        }} />
       </div>
     </div>
   );
