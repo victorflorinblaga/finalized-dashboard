@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react"
+import React from "react";
 import { useQuery } from "@/hooks/useQuery";
-import LoadingIndicator from "@/components/LoadingIndicator"
-import { query } from "@/queries/generated/selam.geg@yahoo.com/m90xh4y5078zwix7qm1e/query";
+import LoadingIndicator from "@/components/LoadingIndicator";
+import { query } from "@/queries/generated/selam.geg@yahoo.com/m92p45do6w53x7vgmcp/query";
 import {
   Table,
   TableBody,
@@ -14,18 +14,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
 export default function Page() {
   
   const [headers, rows, loading] = useQuery(url, query);
 
   if (loading) return <LoadingIndicator />;
+  
+  const filteredRows = rows.filter(row => row[0] === "Germany");
 
   return (
-    <div className="w-full h-full p-2 overflow-x-auto">
+    <div className="w-full h-full p-2">
       <Table>
-        <TableCaption>A list of projects.</TableCaption>
+        <TableCaption>A list of sustainability data from 1990 to 2010 for Germany.</TableCaption>
         <TableHeader>
           <TableRow>
             {headers.map((header, index) => (
@@ -34,20 +36,15 @@ export default function Page() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row, index) => {
-            const projectTitle = row[1].replace(/^http:\/\/example\.com\//, "");
-            return (
-              <TableRow key={index} className={row[2] === "In Progress" ? "bg-green-200" : ""}>
-                {row.map((cell, cellIndex) => (
-                  <TableCell key={cellIndex}>
-                    {cellIndex === 1 ? projectTitle : cell}
-                  </TableCell>
-                ))}
-              </TableRow>
-            );
-          })}
+          {filteredRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex} className={row[1] === "2008" ? "bg-green-200" : ""}>
+              {row.map((cell, cellIndex) => (
+                <TableCell key={cellIndex} className={row[1] === "2008" ? "text-green-600" : ""}>{cell}</TableCell>
+              ))}
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
