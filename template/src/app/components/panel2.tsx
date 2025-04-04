@@ -1,62 +1,52 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@/hooks/useQuery";
 import LoadingIndicator from "@/components/LoadingIndicator";
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-import { query } from "@/queries/generated/selam.geg@yahoo.com/m90vxldsxvbpkbzzork/query";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { query } from "@/queries/generated/selam.geg@yahoo.com/m92pms0bl2l7ww5ksbk/query";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/purchasing";
+const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
 export default function Page() {
   const [headers, rows, loading] = useQuery(url, query);
+  const [filterValue, setFilterValue] = useState("");
 
   if (loading) return <LoadingIndicator />;
 
-  const supplierMap = {};
-  rows.forEach(row => {
-    const supplier = row[1]; // Assuming supplier_name is at index 1
-    if (supplierMap[supplier]) {
-      supplierMap[supplier]++;
-    } else {
-      supplierMap[supplier] = 1;
-    }
+  const filteredRows = rows.filter(row => {
+    const co2Index = headers.indexOf("co2");
+    return co2Index > -1 && (filterValue === "" || parseFloat(row[co2Index]) >= parseFloat(filterValue));
   });
-
-  const suppliers = Object.keys(supplierMap);
-  const supplierCounts = Object.values(supplierMap);
-
-  const data = {
-    labels: suppliers,
-    datasets: [
-      {
-        label: 'Supplier Count',
-        data: supplierCounts,
-        backgroundColor: 'rgba(75, 192, 192, 0.6)',
-      },
-    ],
-  };
 
   return (
     <div className="w-full h-full p-4">
-      <div className="min-w-full">
-        <Bar data={data} options={{
-          responsive: true,
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-            },
-            title: {
-              display: true,
-              text: 'Supplier Distribution',
-            },
-          },
-        }} />
-      </div>
+      <Input 
+        placeholder="🔍 Filter CO2 values (e.g., ≥ 0, 5, 10, or enter a value)" 
+        value={filterValue} 
+        onChange={(e) => setFilterValue(e.target.value)} 
+        className="mb-4 w-full"
+      />
+      <Table>
+        <TableCaption>A list of sustainability data by country and year.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header, index) => (
+              <TableHead key={index} className="text-left">{header}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredRows.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {row.map((cell, cellIndex) => (
+                <TableCell key={cellIndex} className="text-left">{cell}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
