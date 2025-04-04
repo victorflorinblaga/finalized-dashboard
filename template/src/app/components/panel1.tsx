@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React from "react"
 import { useQuery } from "@/hooks/useQuery";
-import LoadingIndicator from "@/components/LoadingIndicator";
-import { query } from "@/queries/generated/selam.geg@yahoo.com/m92p45do6w53x7vgmcp/query";
+import LoadingIndicator from "@/components/LoadingIndicator"
+import { query } from "@/queries/generated/selam.geg@yahoo.com/m92wqx6e9mwepik3xtb/query";
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui/table"
 
 const url = "http://genui-kg-a8hedtafhpb0fwak.germanywestcentral-01.azurewebsites.net/repositories/sustainability";
 
@@ -21,30 +21,30 @@ export default function Page() {
   const [headers, rows, loading] = useQuery(url, query);
 
   if (loading) return <LoadingIndicator />;
-  
-  const filteredRows = rows.filter(row => row[0] === "Germany");
+
+  const filteredRows = rows.filter(row => row[1] === "2008");
 
   return (
     <div className="w-full h-full p-2">
       <Table>
-        <TableCaption>A list of sustainability data from 1990 to 2010 for Germany.</TableCaption>
+        <TableCaption>A list of sustainability data for the year 2008.</TableCaption>
         <TableHeader>
           <TableRow>
-            {headers.map((header, index) => (
-              <TableHead key={index}>{header}</TableHead>
+            {headers.map((header) => (
+              <TableHead key={header} className="w-auto">{header}</TableHead>
             ))}
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredRows.map((row, rowIndex) => (
-            <TableRow key={rowIndex} className={row[1] === "2008" ? "bg-green-200" : ""}>
+          {filteredRows.map((row, index) => (
+            <TableRow key={index} className="bg-yellow-300">
               {row.map((cell, cellIndex) => (
-                <TableCell key={cellIndex} className={row[1] === "2008" ? "text-green-600" : ""}>{cell}</TableCell>
+                <TableCell key={cellIndex} className="text-left">{cell}</TableCell>
               ))}
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
-  );
+  )
 }
